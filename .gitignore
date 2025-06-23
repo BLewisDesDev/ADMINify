@@ -9,6 +9,9 @@
 # CSV Files
 *.csv
 
+*.docx
+*.pdf
+
 # Excel Files
 *.xlsx
 *.xls
@@ -307,3 +310,5 @@ temp/
 *config*
 *secret*
 *credential*
+
+caura/doc_gen/care_plans/CarePlans/output/
