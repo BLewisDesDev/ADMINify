@@ -9,13 +9,13 @@ import json
 from pathlib import Path
 import sys
 
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.document_generator import DocumentGenerator
-from core.data_processor import ClientDataProcessor
-from core.pii_obfuscator import PIIObfuscator
-from utils.logging_utils import setup_module_logging
+from src.core.document_generator import DocumentGenerator
+from src.core.data_processor import ClientDataProcessor
+from src.core.pii_obfuscator import PIIObfuscator
+from src.utils.logging_utils import setup_module_logging
 
 logger = setup_module_logging("test_example_usage", "INFO")
 

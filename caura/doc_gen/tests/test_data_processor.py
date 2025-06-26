@@ -9,11 +9,12 @@ import json
 from pathlib import Path
 import sys
 
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.data_processor import ClientDataProcessor, format_client_name
-from utils.logging_utils import setup_module_logging
+# Import from doc_gen module
+from src.core.data_processor import ClientDataProcessor, format_client_name
+from src.utils.logging_utils import setup_module_logging
 
 logger = setup_module_logging("test_data_processor", "INFO")
 

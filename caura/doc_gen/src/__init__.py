@@ -20,10 +20,9 @@ __author__ = "Byron Lewis"
 # Core imports for external use
 from .core.document_generator import DocumentGenerator
 from .core.pii_obfuscator import PIIObfuscator
-from .core.sharepoint_connector import SharePointConnector
+# Note: SharePointConnector will be added in Phase 2
 
 __all__ = [
     "DocumentGenerator",
-    "PIIObfuscator", 
-    "SharePointConnector"
+    "PIIObfuscator"
 ]
