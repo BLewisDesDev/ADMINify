@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Environment and secrets
+.env
+.env.local
+config/credentials.json
+*.key
+
+# Generated documents and outputs
+output/
+logs/
+temp/
+*.log
+
+# Template development
+templates/*.tmp
+templates/*.backup
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+coverage.xml
+.coverage
+htmlcov/
+
+# SharePoint temporary files
+~$*.docx
+.~lock.*
+
+# LLM cache and temporary data
+llm_cache/
+obfuscation_temp/
+session_data/

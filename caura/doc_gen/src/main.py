@@ -1,482 +1,448 @@
+# File: doc_gen/src/main.py
 """
-Care Plan Document Processor
+Document Generator CLI Entry Point
 
-This module serves as the entry point for the Care Plan document processing system.
-It handles template loading, document generation, and PDF conversion.
-
-Usage:
-    python -m src.main
-
-Author: Byron
-Date: March 4, 2025
+Command-line interface for professional document generation system.
 """
 
-import logging
+import argparse
 import sys
-import os
 from pathlib import Path
-from typing import Dict, Any, Optional, List
-import json
-from docxtpl import DocxTemplate
-from datetime import datetime
-import docx2pdf
-import pandas as pd
-import subprocess
+from typing import Dict, Any, List, Optional
 
-def setup_logging(log_level: str = "INFO") -> None:
+from .core.document_generator import DocumentGenerator
+from .core.data_processor import ClientDataProcessor
+from .core.pii_obfuscator import PIIObfuscator
+from .utils.logging_utils import setup_module_logging
+from .utils.file_utils import load_json_safe, save_json_safe
+
+# Initialize logger
+logger = setup_module_logging("doc_gen_cli")
+
+
+def create_argument_parser() -> argparse.ArgumentParser:
     """
-    Set up logging configuration with sensible defaults.
+    Create command-line argument parser.
     
-    Args:
-        log_level: Desired logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    Returns:
+        Configured ArgumentParser
     """
-    # Get the project root directory (one level up from src)
-    project_root = Path(__file__).parent.parent
-    log_dir = project_root / "logs"
-    log_dir.mkdir(exist_ok=True)
-    
-    log_file = log_dir / "care_plan_processor.log"
-    
-    # Map string log level to logging constants
-    level_map = {
-        "DEBUG": logging.DEBUG,
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL
-    }
-    
-    numeric_level = level_map.get(log_level.upper(), logging.INFO)
-    
-    # Configure logging
-    logging.basicConfig(
-        level=numeric_level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(sys.stdout)
-        ]
+    parser = argparse.ArgumentParser(
+        description="Professional Document Generator for NDIS/Aged Care",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Generate care plan from JSON data
+  python -m src.main generate --type care_plan --input client_data.json
+
+  # Generate multiple documents with PDF output
+  python -m src.main generate --type service_agreement --input clients.json --pdf
+
+  # Process Excel file and generate care plans
+  python -m src.main generate --type care_plan --input clients.xlsx --sheet "Client Data"
+
+  # Generate with custom template
+  python -m src.main generate --type care_plan --input data.json --template custom_care_plan.docx
+
+  # List available templates
+  python -m src.main list-templates
+
+  # Validate client data
+  python -m src.main validate --input client_data.json --type care_plan
+        """
     )
     
-    logging.info(f"Logging initialized at level {log_level}")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    
+    # Generate command
+    generate_parser = subparsers.add_parser("generate", help="Generate documents")
+    generate_parser.add_argument(
+        "--type", 
+        required=True,
+        choices=["care_plan", "service_agreement", "wellness_plan"],
+        help="Type of document to generate"
+    )
+    generate_parser.add_argument(
+        "--input", 
+        required=True,
+        help="Input file (JSON or Excel) containing client data"
+    )
+    generate_parser.add_argument(
+        "--output", 
+        help="Output directory (default: output/)"
+    )
+    generate_parser.add_argument(
+        "--template", 
+        help="Custom template file path"
+    )
+    generate_parser.add_argument(
+        "--template-version", 
+        help="Specific template version to use"
+    )
+    generate_parser.add_argument(
+        "--sheet", 
+        help="Excel sheet name (for Excel input files)"
+    )
+    generate_parser.add_argument(
+        "--pdf", 
+        action="store_true",
+        help="Generate PDF versions of documents"
+    )
+    generate_parser.add_argument(
+        "--enable-llm", 
+        action="store_true",
+        help="Enable LLM content generation (requires PII obfuscation)"
+    )
+    generate_parser.add_argument(
+        "--client-id", 
+        help="Generate document for specific client ID only"
+    )
+    
+    # Validate command
+    validate_parser = subparsers.add_parser("validate", help="Validate client data")
+    validate_parser.add_argument(
+        "--input", 
+        required=True,
+        help="Input file containing client data"
+    )
+    validate_parser.add_argument(
+        "--type", 
+        required=True,
+        choices=["care_plan", "service_agreement", "wellness_plan"],
+        help="Document type for validation context"
+    )
+    validate_parser.add_argument(
+        "--sheet", 
+        help="Excel sheet name (for Excel input files)"
+    )
+    
+    # List templates command
+    list_parser = subparsers.add_parser("list-templates", help="List available templates")
+    list_parser.add_argument(
+        "--type", 
+        choices=["care_plan", "service_agreement", "wellness_plan"],
+        help="Filter by document type"
+    )
+    
+    # Process data command
+    process_parser = subparsers.add_parser("process-data", help="Process and validate client data")
+    process_parser.add_argument(
+        "--input", 
+        required=True,
+        help="Input file (Excel or JSON)"
+    )
+    process_parser.add_argument(
+        "--output", 
+        required=True,
+        help="Output JSON file for processed data"
+    )
+    process_parser.add_argument(
+        "--sheet", 
+        help="Excel sheet name"
+    )
+    
+    # Global options
+    parser.add_argument(
+        "--log-level", 
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Set logging level"
+    )
+    parser.add_argument(
+        "--config", 
+        help="Configuration file path"
+    )
+    
+    return parser
 
 
-def ensure_directory_structure() -> Dict[str, Path]:
+def load_client_data(input_path: str, sheet_name: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
     """
-    Create and validate the project directory structure.
-    
-    Returns:
-        Dictionary containing Path objects for each important directory
-    """
-    # Get the project root directory (one level up from src)
-    project_root = Path(__file__).parent.parent
-    
-    # Define directory structure
-    dirs = {
-        "templates": project_root / "templates",
-        "output": project_root / "output",
-        "output_docx": project_root / "output/docx",
-        "output_pdf": project_root / "output/pdf",
-        "data": project_root / "data"
-    }
-    
-    # Create directories if they don't exist
-    for name, path in dirs.items():
-        path.mkdir(exist_ok=True, parents=True)
-        logging.debug(f"Ensured {name} directory exists at {path}")
-    
-    return dirs
-
-
-def clean_value(val):
-    """
-    Clean a value by converting NaN or 'nan' strings to empty strings.
+    Load client data from input file.
     
     Args:
-        val: The value to clean
+        input_path: Path to input file
+        sheet_name: Excel sheet name (if applicable)
         
     Returns:
-        Cleaned value
+        List of client data dictionaries or None if error
     """
-    if isinstance(val, str) and val.lower() == 'nan':
-        return ""
-    return str(val) if val is not None else ""
-
-
-def extract_client_data_from_excel(excel_path: str) -> Optional[List[Dict[str, Any]]]:
-    """
-    Extract client data from the Excel database and format it for care plan generation.
-    
-    Args:
-        excel_path: Path to the Excel database file
-        
-    Returns:
-        List of dictionaries containing client data if successful, None otherwise
-    """
-    
-    excel_file = Path(excel_path)
-    if not excel_file.exists():
-        logging.error(f"Excel database not found: {excel_path}")
-        return None
-    
     try:
-        # Read the Excel file
-        df = pd.read_excel(excel_file)
+        input_file = Path(input_path)
         
-        # Check if required columns exist
-        required_columns = [
-            'Type','ACN', 'GivenName', 'FamilyName', 'BirthDate', 'GenderCode',
-            'AddressLine1', 'AddressLine2', 'Suburb', 'Postcode'
-        ]
-        
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            logging.error(f"Required columns missing from Excel file: {', '.join(missing_columns)}")
+        if not input_file.exists():
+            logger.error(f"Input file not found: {input_path}")
             return None
         
-        # Format the date for the plan
-        date_of_plan = "15/11/24"  # Fixed date as requested
-        review_date = "14/11/25"   # Fixed date as requested
+        processor = ClientDataProcessor()
         
-        # Process each client and format data
-        clients_data = []
-        for _, row in df.iterrows():
-            # Format birth date
-            birth_date = row['BirthDate']
-            if pd.notna(birth_date):
-                if isinstance(birth_date, (datetime, pd.Timestamp)):
-                    birth_date = birth_date.strftime('%d/%m/%Y')
-                else:
-                    try:
-                        birth_date = pd.to_datetime(birth_date).strftime('%d/%m/%Y')
-                    except:
-                        birth_date = clean_value(birth_date)
-            else:
-                birth_date = ""
-            
-            # Create client data dictionary with all values cleaned
-            client_data = {
-                'ACN': clean_value(row['ACN']),
-                'Type': clean_value(row['Type']),
-                'FirstName': clean_value(row['GivenName']),
-                'LastName': clean_value(row['FamilyName']),
-                'DOB': birth_date,
-                'Gender': clean_value(row['GenderCode']),
-                'Address1': clean_value(row['AddressLine1']),
-                'Address2': clean_value(row['AddressLine2']),
-                'Suburb': clean_value(row['Suburb']),
-                'PostCode': clean_value(row['Postcode']),
-                'DateOfPlan': date_of_plan,
-                'ReviewDate': review_date,
-            }
-            
-            clients_data.append(client_data)
+        if input_file.suffix.lower() in ['.xlsx', '.xls']:
+            # Load from Excel
+            clients_data = processor.load_from_excel(input_path, sheet_name)
+        elif input_file.suffix.lower() == '.json':
+            # Load from JSON
+            clients_data = processor.load_from_json(input_path)
+        else:
+            logger.error(f"Unsupported file format: {input_file.suffix}")
+            return None
         
-        logging.info(f"Successfully extracted data for {len(clients_data)} clients from Excel database")
+        if clients_data:
+            logger.info(f"Loaded {len(clients_data)} clients from {input_path}")
+        
         return clients_data
-    
+        
     except Exception as e:
-        logging.error(f"Failed to extract client data from Excel: {str(e)}")
+        logger.error(f"Error loading client data: {str(e)}")
         return None
 
 
-def save_client_data_to_json(clients_data: List[Dict[str, Any]], output_path: Optional[str] = None) -> bool:
+def generate_documents(args) -> bool:
     """
-    Save client data to a single JSON file.
+    Generate documents based on command arguments.
     
     Args:
-        clients_data: List of dictionaries containing client data
-        output_path: Optional path for the JSON file (default: data/all_clients_data.json)
+        args: Parsed command arguments
         
     Returns:
-        True if successful, False otherwise
+        True if generation successful, False otherwise
     """
     try:
-        # Clean the data - replace any 'nan' strings with empty strings
-        cleaned_clients_data = []
-        for client in clients_data:
-            cleaned_client = {}
-            for key, value in client.items():
-                cleaned_client[key] = clean_value(value)
-            cleaned_clients_data.append(cleaned_client)
+        # Load client data
+        clients_data = load_client_data(args.input, args.sheet)
+        if not clients_data:
+            return False
         
-        # Set default output path if not provided
-        if not output_path:
-            dirs = ensure_directory_structure()
-            data_dir = dirs["data"]
-            output_path = data_dir / "all_clients_data.json"
-        else:
-            output_path = Path(output_path)
-            output_path.parent.mkdir(exist_ok=True, parents=True)
+        # Filter by client ID if specified
+        if args.client_id:
+            clients_data = [
+                client for client in clients_data 
+                if client.get("client_id") == args.client_id
+            ]
+            if not clients_data:
+                logger.error(f"Client ID not found: {args.client_id}")
+                return False
         
-        # Save to JSON file
-        with open(output_path, 'w') as f:
-            json.dump(cleaned_clients_data, f, indent=4)
+        # Initialize document generator
+        generator = DocumentGenerator()
         
-        logging.info(f"Successfully saved data for {len(cleaned_clients_data)} clients to {output_path}")
-        return True
-    
+        # Process clients for document type
+        processor = ClientDataProcessor()
+        processed_clients = processor.process_clients_for_document_type(
+            clients_data, args.type
+        )
+        
+        if not processed_clients:
+            logger.error("No valid clients to process")
+            return False
+        
+        # Generate documents for each client
+        successful_generations = 0
+        total_clients = len(processed_clients)
+        
+        logger.info(f"Generating {args.type} documents for {total_clients} clients")
+        
+        for i, client_data in enumerate(processed_clients, 1):
+            try:
+                logger.info(f"Processing client {i}/{total_clients}: {client_data.get('client_id', 'unknown')}")
+                
+                # Generate document
+                result = generator.generate_document(
+                    document_type=args.type,
+                    client_data=client_data,
+                    template_version=args.template_version,
+                    enable_pdf=args.pdf,
+                    custom_template=args.template
+                )
+                
+                if result:
+                    successful_generations += 1
+                    logger.info(f"✓ Generated: {result['docx_file']}")
+                    if result.get('pdf_file'):
+                        logger.info(f"✓ PDF: {result['pdf_file']}")
+                else:
+                    logger.error(f"✗ Failed to generate document for client {client_data.get('client_id', 'unknown')}")
+                    
+            except Exception as e:
+                logger.error(f"Error processing client {client_data.get('client_id', 'unknown')}: {str(e)}")
+        
+        # Report results
+        logger.info(f"Document generation completed: {successful_generations}/{total_clients} successful")
+        
+        if successful_generations > 0:
+            generation_summary = generator.get_generation_summary()
+            logger.info(f"Generated documents saved to: {generator.directories['output']}")
+            
+            # Save generation summary
+            summary_path = generator.directories["output"] / f"generation_summary_{args.type}.json"
+            save_json_safe(generation_summary, summary_path)
+            logger.info(f"Generation summary saved: {summary_path}")
+        
+        return successful_generations > 0
+        
     except Exception as e:
-        logging.error(f"Failed to save client data to JSON: {str(e)}")
+        logger.error(f"Error in document generation: {str(e)}")
         return False
 
 
-def load_json_data(json_path: str) -> Optional[List[Dict[str, Any]]]:
+def validate_data(args) -> bool:
     """
-    Load data from a JSON file. Expects a list of JSON objects.
+    Validate client data without generating documents.
     
     Args:
-        json_path: Path to the JSON file
+        args: Parsed command arguments
         
     Returns:
-        List of dictionaries if successful, None otherwise
+        True if validation successful, False otherwise
     """
     try:
-        file_path = Path(json_path)
-        if not file_path.exists():
-            logging.error(f"JSON file not found: {json_path}")
-            return None
+        # Load client data
+        clients_data = load_client_data(args.input, args.sheet)
+        if not clients_data:
+            return False
         
-        with open(file_path, 'r') as file:
-            data = json.load(file)
+        # Process and validate clients
+        processor = ClientDataProcessor()
+        processed_clients = processor.process_clients_for_document_type(
+            clients_data, args.type
+        )
         
-        # Ensure the data is a list
-        if not isinstance(data, list):
-            logging.error(f"JSON data is not a list. Got {type(data)} instead.")
-            return None
+        # Report validation results
+        total_clients = len(clients_data)
+        valid_clients = len(processed_clients)
         
-        logging.info(f"Successfully loaded {len(data)} items from {json_path}")
-        return data
-    
+        logger.info(f"Validation completed: {valid_clients}/{total_clients} clients valid for {args.type}")
+        
+        # Get detailed validation summary
+        validation_summary = processor.get_processing_summary()
+        
+        if validation_summary["errors_count"] > 0:
+            logger.warning(f"Validation errors found:")
+            for error in validation_summary["errors"]:
+                logger.warning(f"  - {error}")
+        
+        return valid_clients > 0
+        
     except Exception as e:
-        logging.error(f"Failed to load JSON data: {str(e)}")
-        return None
+        logger.error(f"Error in data validation: {str(e)}")
+        return False
 
 
-def load_template(template_path: str) -> Optional[DocxTemplate]:
+def list_templates(args) -> bool:
     """
-    Load a docxtpl template.
+    List available document templates.
     
     Args:
-        template_path: Path to the template file
+        args: Parsed command arguments
         
     Returns:
-        DocxTemplate object if successful, None otherwise
+        True if listing successful, False otherwise
     """
     try:
-        template_file = Path(template_path)
-        if not template_file.exists():
-            logging.error(f"Template not found: {template_path}")
-            return None
+        generator = DocumentGenerator()
         
-        template = DocxTemplate(template_file)
-        logging.info(f"Successfully loaded template: {template_path}")
-        return template
-    except Exception as e:
-        logging.error(f"Failed to load template {template_path}: {str(e)}")
-        return None
-
-
-def process_document(template: DocxTemplate, context: Dict[str, Any], output_path: str) -> Optional[Path]:
-    """
-    Process a document by rendering a template with context data.
-    
-    Args:
-        template: Loaded DocxTemplate object
-        context: Dictionary containing data to render in the template
-        output_path: Path for the output file
+        # Get templates directory
+        templates_dir = generator.directories["templates"]
         
-    Returns:
-        Path to the generated document if successful, None otherwise
-    """
-    try:
-        # Render the template with the provided context
-        template.render(context)
-        
-        # Ensure output directory exists
-        output_file = Path(output_path)
-        output_file.parent.mkdir(exist_ok=True, parents=True)
-        
-        # Save the document
-        template.save(output_file)
-        logging.info(f"Document successfully generated: {output_file}")
-        
-        return output_file
-    except Exception as e:
-        logging.error(f"Failed to process document: {str(e)}")
-        return None
-  
-
-def convert_to_pdf(docx_path: str, pdf_path: Optional[str] = None) -> Optional[Path]:
-    """
-    Convert a DOCX file to PDF using LibreOffice.
-    
-    Args:
-        docx_path: Path to the DOCX file
-        pdf_path: Optional path for the PDF file (default: same name with .pdf extension in pdf directory)
-        
-    Returns:
-        Path to the generated PDF if successful, None otherwise
-    """
-    
-    try:
-        docx_file = Path(docx_path).resolve()  # Get absolute path
-        
-        # Create output PDF path if not provided
-        if not pdf_path:
-            # Create pdf directory next to docx directory
-            pdf_dir = docx_file.parent.parent / "pdf"
-            pdf_dir.mkdir(exist_ok=True, parents=True)
-            pdf_file = pdf_dir / docx_file.name.replace('.docx', '.pdf')
+        if args.type:
+            # List templates for specific type
+            type_dir = templates_dir / args.type
+            if type_dir.exists():
+                templates = list(type_dir.glob("*.docx"))
+                logger.info(f"Templates for {args.type}:")
+                for template in sorted(templates):
+                    logger.info(f"  - {template.name}")
+            else:
+                logger.warning(f"No templates directory found for {args.type}")
         else:
-            pdf_file = Path(pdf_path)
-            pdf_file.parent.mkdir(exist_ok=True, parents=True)
+            # List all templates
+            logger.info("Available templates:")
+            for doc_type in generator.DOCUMENT_TYPES.keys():
+                type_dir = templates_dir / doc_type
+                if type_dir.exists():
+                    templates = list(type_dir.glob("*.docx"))
+                    logger.info(f"  {doc_type}:")
+                    for template in sorted(templates):
+                        logger.info(f"    - {template.name}")
+                else:
+                    logger.info(f"  {doc_type}: No templates found")
         
-        # Use absolute paths for reliability
-        output_dir = str(pdf_file.parent.resolve())
-        
-        # Use PDF/A export format for better form compatibility
-        cmd = [
-            'soffice',
-            '--headless',
-            '--convert-to', 'pdf:writer_pdf_Export:SelectPdfVersion=1',
-            '--outdir', output_dir,
-            str(docx_file)
-        ]
-        
-        # Log the command for debugging
-        logging.info(f"Running conversion command: {' '.join(cmd)}")
-        
-        # Run the process
-        process = subprocess.run(cmd, capture_output=True, text=True)
-        
-        # Log output regardless of success/failure
-        logging.info(f"LibreOffice stdout: {process.stdout}")
-        
-        if process.returncode != 0:
-            logging.error(f"LibreOffice conversion failed: {process.stderr}")
-            return None
-        
-        # LibreOffice puts the output in the outdir with the original filename but .pdf extension
-        expected_output = pdf_file.parent / docx_file.name.replace('.docx', '.pdf')
-        
-        # Verify the file was created
-        if not expected_output.exists():
-            logging.error(f"Expected output file not found: {expected_output}")
-            # List directory contents for debugging
-            logging.error(f"Directory contents: {os.listdir(output_dir)}")
-            return None
-        
-        # If the output path is different from LibreOffice's default output, rename it
-        if expected_output != pdf_file:
-            try:
-                expected_output.rename(pdf_file)
-            except Exception as rename_error:
-                logging.error(f"Error renaming output file: {str(rename_error)}")
-                # Return the original path if rename fails
-                pdf_file = expected_output
-        
-        logging.info(f"PDF successfully generated: {pdf_file}")
-        return pdf_file
+        return True
         
     except Exception as e:
-        logging.error(f"Failed to convert to PDF: {str(e)}")
-        logging.exception("Detailed traceback:")  # This will print the full stack trace
-        return None
+        logger.error(f"Error listing templates: {str(e)}")
+        return False
 
 
-def process_clients(template_path: str, clients_data: List[Dict[str, Any]], output_dir: str, generate_pdf: bool = False) -> int:
+def process_data_only(args) -> bool:
     """
-    Process a list of clients, generating documents for each.
+    Process and save client data without generating documents.
     
     Args:
-        template_path: Path to the template file
-        clients_data: List of dictionaries containing client data
-        output_dir: Directory for output files
-        generate_pdf: Whether to generate PDF files
+        args: Parsed command arguments
         
     Returns:
-        Number of successfully processed clients
+        True if processing successful, False otherwise
     """
-    # Load template
-    template = load_template(template_path)
-    if not template:
-        logging.error("Failed to load template. Exiting.")
-        return 0
-    
-    # Ensure output directories exist
-    output_path = Path(output_dir)
-    docx_dir = output_path / "docx"
-    pdf_dir = output_path / "pdf"
-    docx_dir.mkdir(exist_ok=True, parents=True)
-    if generate_pdf:
-        pdf_dir.mkdir(exist_ok=True, parents=True)
-    
-    # Process each client
-    success_count = 0
-    for client in clients_data:
-        # Make sure DateToday is set if template needs it
-        if "DateOfPlan" in client and "DateToday" not in client:
-            client["DateToday"] = client["DateOfPlan"]
+    try:
+        # Load client data
+        clients_data = load_client_data(args.input, args.sheet)
+        if not clients_data:
+            return False
         
-        # Generate output name from client data
-        if "ACN" in client and "LastName" in client:
-            filename = f"{client['ACN']}_{client['LastName']}.docx"
+        # Process data
+        processor = ClientDataProcessor()
+        
+        # Save processed data
+        success = processor.save_processed_data(clients_data, args.output)
+        
+        if success:
+            logger.info(f"Processed data saved to: {args.output}")
+        
+        return success
+        
+    except Exception as e:
+        logger.error(f"Error processing data: {str(e)}")
+        return False
+
+
+def main() -> int:
+    """
+    Main CLI entry point.
+    
+    Returns:
+        Exit code (0 for success, 1 for error)
+    """
+    try:
+        # Parse arguments
+        parser = create_argument_parser()
+        args = parser.parse_args()
+        
+        # Set up logging
+        global logger
+        logger = setup_module_logging("doc_gen_cli", args.log_level)
+        
+        # Handle commands
+        if args.command == "generate":
+            success = generate_documents(args)
+        elif args.command == "validate":
+            success = validate_data(args)
+        elif args.command == "list-templates":
+            success = list_templates(args)
+        elif args.command == "process-data":
+            success = process_data_only(args)
         else:
-            filename = f"client_{success_count}.docx"
+            parser.print_help()
+            return 1
         
-        # Full output path for DOCX
-        docx_path = docx_dir / filename
+        return 0 if success else 1
         
-        # Process document
-        result = process_document(template, client, docx_path)
-        if not result:
-            logging.warning(f"Failed to process document for client. Continuing with next client.")
-            continue
-        
-        # Convert to PDF if requested
-        if generate_pdf:
-            pdf_filename = filename.replace('.docx', '.pdf')
-            pdf_path = pdf_dir / pdf_filename
-            convert_to_pdf(docx_path, pdf_path)
-        
-        success_count += 1
-    
-    logging.info(f"Processed documents for {success_count} out of {len(clients_data)} clients")
-    return success_count
+    except KeyboardInterrupt:
+        logger.info("Operation cancelled by user")
+        return 1
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        return 1
 
-
-def main():
-    """
-    Main function for Care Plan document processing.
-    Can be customized based on your specific needs.
-    """
-    # Set up logging
-    setup_logging("INFO")
-    
-    # Ensure directory structure
-    dirs = ensure_directory_structure()
-    
-    # # Example: Import from Excel
-    # excel_path = "/Users/byron/Desktop/DEX-V3/database/Client-Database.xlsx"
-    # clients_data = extract_client_data_from_excel(excel_path)
-    
-    # if clients_data:
-    #     # Save to JSON file
-    #     save_client_data_to_json(clients_data)
-        
-    #     # Process all clients with separate directories for DOCX and PDF
-    #     template_path = dirs["templates"] / "care_plan_template.docx"
-    #     process_clients(template_path, clients_data, dirs["output"], generate_pdf=True)
-    
-		# TODO: Collect Additional Information and add to the client data
-    
-    # Example: Load from JSON and process
-    json_path = dirs["data"] / "all_clients_data.json"
-    clients_data = load_json_data(json_path)
-    if clients_data:
-        template_path = dirs["templates"] / "care_plan_template.docx"
-        process_clients(template_path, clients_data, dirs["output"], generate_pdf=True)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
