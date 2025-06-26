@@ -1,0 +1,764 @@
+/* Additional CSS for Caura */
+.ast-builder-menu-mobile
+	.main-navigation
+	.main-header-menu
+	.menu-item
+	> .ast-menu-toggle {
+	color: #ffffff;
+}
+.e-date {
+	display: none !important;
+}
+#nav_menu-5 {
+	margin-bottom: 0 !important;
+}
+
+.error404 #content {
+	background: #fff;
+}
+
+.error-404.not-found {
+	text-align: center;
+	padding: 50px 0 70px;
+}
+
+.error404 #primary {
+	margin-top: 0px !important;
+}
+
+.error404 .page-content .banner-btns {
+	display: block;
+	padding-top: 30px;
+}
+
+.referral-row-main .gform_footer {
+	display: block !important;
+	text-align: center !important;
+}
+
+.datepicker {
+	width: 100% !important;
+}
+
+.ast-menu-toggle:focus,
+.ast-menu-toggle:focus-visible,
+.menu-toggle-close:focus,
+.menu-toggle-close:focus-visible {
+	border: 0px !important;
+	outline: 0px !important;
+}
+
+@media only screen and (max-width: 767px) {
+	.our-partenrs h3 {
+		font-size: 32px !important;
+	}
+	.page-id-31 .referral-row-main > div > div,
+	.page-id-1445 .referral-row-main > div > div,
+	.referral-row-main > .vc_col-sm-12,
+	.astra-advanced-hook-677 .wd-contained .vc_col-sm-12 .vc_column-inner,
+	.astra-advanced-hook-677 .wd-contained .vc_col-sm-12 {
+		padding: 15px !important;
+	}
+	.form-col #gform_wrapper_1 {
+		border-radius: 20px;
+	}
+
+	.ast-scroll-to-top-right {
+		right: 10px !important;
+		bottom: 10px !important;
+	}
+
+	.form-col > .vc_column-inner {
+		padding: 20px;
+	}
+	.form-col {
+		padding: 0px !important;
+	}
+
+	.astra-advanced-hook-677 > .vc_row > .vc_col-sm-12 {
+		padding: 0px 20px;
+	}
+
+	.banner-main-row h1,
+	.banner-main-row p {
+		text-align: center;
+	}
+
+	.banner-btns {
+		justify-content: center;
+	}
+
+	.ser-1sr-para {
+		font-size: 19px !important;
+	}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+	.abt-page-2ndsection .vc_empty_space {
+		height: 500px !important;
+	}
+
+	.our-partenrs h3 {
+		font-size: 35px !important;
+	}
+
+	.cont-form-inner {
+		display: block;
+	}
+
+	.our-partenrs {
+		width: 400px;
+		margin: auto;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.our-partner-row h2 {
+		font-size: 40px !important;
+	}
+
+	.cont-form-inner .vc_col-sm-6 {
+		width: 100%;
+	}
+
+	.cont-hand-img img {
+		width: 50%;
+	}
+
+	.site-above-footer-wrap .ast-builder-footer-grid-columns {
+		grid-column-gap: 0;
+	}
+
+	.site-above-footer-wrap {
+		padding-bottom: 50px !important;
+	}
+
+	.footer-btns a {
+		min-width: auto !important;
+	}
+
+	.footer-btns {
+		column-gap: 15px;
+	}
+
+	.site-footer-primary-section-2 {
+		display: grid !important;
+		margin-bottom: 0px !important;
+	}
+
+	.site-footer-primary-section-1 .wp-block-image {
+		text-align: center;
+	}
+	.site-primary-footer-inner-wrap {
+		grid-template-columns: initial !important;
+	}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1365px) {
+	.page-id-31 .referral-row-main > div > div,
+	.page-id-1445 .referral-row-main > div > div,
+	.referral-row-main > .vc_col-sm-12,
+	.astra-advanced-hook-677 .wd-contained .vc_col-sm-12 .vc_column-inner,
+	.astra-advanced-hook-677 .wd-contained .vc_col-sm-12 {
+		padding: 25px !important;
+	}
+
+	.faq-num {
+		font-size: 35px !important;
+	}
+
+	.accordion-f a {
+		padding: 30px 80px !important;
+	}
+	.form-col > .vc_column-inner {
+		padding: 0px 35px;
+	}
+
+	.form-col {
+		padding: 10px !important;
+	}
+
+	.contact-2nd-sec .vc_row {
+		padding: 0px 15px;
+	}
+
+	.site-primary-footer-inner-wrap {
+		padding: 0px 30px;
+		row-gap: 50px;
+		grid-column-gap: 50px !important;
+	}
+
+	.site-above-footer-inner-wrap {
+		column-gap: 0;
+	}
+
+	.footer-cta {
+		padding: 0px;
+	}
+
+	.astra-advanced-hook-677 > .vc_row > .vc_col-sm-12 {
+		padding: 0px 30px;
+	}
+}
+
+@media only screen and (max-width: 1023px) {
+	.video-col:before,
+	.video-sparkles {
+		display: none !important;
+	}
+
+	.video-section .vc_col-sm-5,
+	.video-section .vc_col-sm-7,
+	.abt-page-2ndsection .vc_col-sm-8,
+	.abt-page-2ndsection .vc_col-sm-4 {
+		width: 100% !important;
+	}
+
+	.abt-page-2ndsection-inner-2 .vc_col-sm-8 > div {
+		margin-left: 0px !important;
+		margin-top: 30px;
+	}
+
+	.abt-page-2ndsection-inner-1 .vc_col-sm-8 > div {
+		margin-right: 0px !important;
+		margin-top: 30px;
+	}
+
+	.abt-page-2ndsection-inner-1 {
+		flex-direction: column-reverse;
+	}
+
+	.abt-page-2ndsection-inner-2 {
+		padding: 25px 30px 30px;
+	}
+
+	.abt-page-2ndsection-inner-1 {
+		border-radius: 20px 20px 0 0;
+		padding: 30px 30px 25px;
+	}
+
+	.video-col > div > div {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+		padding-top: 30px;
+	}
+	.video-text-col > div > div {
+		padding-right: 0px !important;
+	}
+
+	.our-partner-row h2,
+	.our-partner-row p {
+		text-align: left !important;
+	}
+
+	.our-partner-row .partner-r-col > div > div {
+		padding-left: 0px !important;
+	}
+	.our-partner-row .vc_col-sm-7 {
+		margin-top: 30px;
+	}
+
+	.our-partner-row .vc_col-sm-5,
+	.our-partner-row .vc_col-sm-7 {
+		width: 100% !important;
+	}
+
+	.cont-mob-sep {
+		height: 15px !important;
+	}
+	.referral-row-main h3.gsection_title {
+		font-size: 25px !important;
+		padding-top: 10px !important;
+	}
+}
+
+@media only screen and (max-width: 1365px) {
+	.site-above-footer-inner-wrap {
+		padding: 0px !important;
+	}
+
+	img.hands-footer {
+		right: 0px !important;
+	}
+
+	.gform-theme--foundation .gform_fields {
+		grid-row-gap: 12px !important;
+	}
+}
+@media only screen and (min-width: 922px) and (max-width: 1023px) {
+	.ast-custom-button:before {
+		content: url(https://www.caura.com.au/wp-content/uploads/2023/12/phone-solid-w.webp);
+	}
+
+	.ast-header-button-1[data-section*="section-hb-button-"]
+		.ast-builder-button-wrap
+		.ast-custom-button {
+		font-size: 0px !important;
+	}
+	header .custom-logo-link img {
+		max-width: 100px !important;
+	}
+
+	.t_menu > ul > li > a {
+		padding: 10px 10px !important;
+	}
+}
+
+@media only screen and (min-width: 1024px) and (max-width: 1365px) {
+	.video-section h2 {
+		font-size: 35px !important;
+	}
+
+	.video-col:before {
+		height: 125px !important;
+		width: 125px !important;
+	}
+	.video-col > div > div {
+		padding-left: 20px !important;
+		padding-right: 30px !important;
+	}
+
+	.our-partner-row .partner-r-col > div > div {
+		padding-left: 30px !important;
+	}
+
+	.our-partner-row h2 {
+		font-size: 45px !important;
+	}
+	.ser-icon {
+		top: auto;
+		margin-top: -35px;
+	}
+	.ast-custom-button:before {
+		content: url(https://www.caura.com.au/wp-content/uploads/2023/12/phone-solid-w.webp);
+	}
+	.ast-custom-button {
+		font-size: 0 !important;
+		padding: 15px !important;
+	}
+}
+
+/* areas we serve scc */
+
+.panelll a {
+	color: #000 !important;
+}
+
+.panelll {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
+}
+
+button.accordionn {
+	padding: 20px 0px;
+	background: transparent !important;
+	font-weight: 600;
+	font-size: 17px;
+	color: #4f1a2d !important;
+
+	font-size: 22px !important;
+}
+.accordionn:hover,
+.accordionn::active {
+	color: #000;
+	margin: auto;
+}
+
+#custom_html-22 .custom-html-widget {
+	margin: auto;
+	text-align: center;
+	padding-bottom: 40px;
+}
+
+.accordionn:after {
+	content: "\002B";
+	color: var(--ast-global-color-2) !important;
+	font-weight: bold;
+	float: right;
+	margin-left: 10px;
+	font-weight: 900;
+	color: #000 !important;
+}
+
+.activee:after {
+	content: "\2212";
+}
+ul#customFooterLoc {
+	margin-left: 0px !important;
+	padding-left: 0px !important;
+}
+ul#customFooterLoc li {
+	display: inline;
+	padding-right: 10px;
+	border-right: 1px solid #000;
+	padding-bottom: 0 !important;
+	margin-right: 10px;
+	line-height: 2.1;
+	font-size: 16px;
+}
+ul#customFooterLoc li a {
+	color: #000 !important;
+}
+ul#customFooterLoc li a:hover,
+button.accordionn:hover {
+	color: #ef3b3a !important;
+}
+
+ul#customFooterLoc li:last-child {
+	border-right: none !important;
+}
+
+/*----------------list section----*/
+
+img.iconCategory {
+	position: absolute;
+	width: 32px;
+	top: 15px;
+	left: 15px;
+}
+
+.list-section h4 {
+	text-align: center;
+}
+.bottom-Property-box {
+	display: flex;
+	justify-content: space-evenly;
+	background: #4f1a2d;
+	padding: 10px;
+}
+.bottom-Property-box p a {
+	color: #fff;
+}
+.bottom-Property-box p {
+	color: #fff;
+	font-weight: 400;
+	flex: 1 1 auto;
+	text-align: center;
+	margin-bottom: 0 !important;
+}
+.bottom-Property-box p:nth-child(2) {
+	border-left: 2px solid #fff;
+}
+.bottom-Property-box p img {
+	width: 20px;
+	margin-top: -4px;
+}
+
+.list-rowbox {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-column-gap: 30px;
+	grid-row-gap: 30px;
+	padding-top: 30px;
+}
+.bed-icon {
+	display: grid;
+	column-gap: 2px;
+	padding: 10px 0;
+	margin-top: -97px;
+	grid-template-columns: 1fr 1fr;
+	text-align: center;
+	row-gap: 1px;
+}
+.list-rowbox p {
+	margin-bottom: 5px;
+}
+.Park-SA {
+	font-size: 30px;
+	color: #000;
+	text-transform: uppercase;
+	margin-top: 5px;
+}
+.NDIS-Robust {
+	margin-bottom: 0 !important;
+	font-size: 17px;
+}
+.beds-1,
+.bathtab-1,
+.location,
+.parking {
+	font-weight: 400;
+	font-size: 15px;
+	margin-bottom: 0px !important;
+	color: #fff;
+	background: rgb(242 64 64 / 70%);
+	padding: 5px 10px;
+}
+.rowHps {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.beds,
+.bathtab,
+.location-1 {
+	background: #fff;
+	padding: 5px 10px;
+	border-radius: 10px;
+	font-weight: 400;
+	font-size: 15px;
+	margin-bottom: 0px !important;
+}
+.bed-icon img {
+	width: 25px;
+	padding-right: 5px;
+}
+.para {
+	padding: 43px 30px 25px 30px;
+	background: #fff;
+	text-align: center;
+	border-top-width: 0px;
+	margin-top: -33px;
+}
+.Aapara {
+	padding: 22px 25px 25px 25px;
+	background: #f5f5f5;
+	text-align: center;
+}
+.list-row {
+	position: relative;
+	border-radius: 20px;
+	overflow: auto;
+}
+.bed-icon .Available {
+	background: #f24040;
+	padding: 0px 10px !important;
+	font-weight: 400;
+	font-size: 14px;
+	margin-bottom: 0px !important;
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	color: #fff;
+	border-radius: 5px;
+}
+
+.No-padding-AA .Park-SA {
+	padding-bottom: 10px;
+}
+.csHead {
+	text-align: center;
+	font-size: 50px;
+	line-height: 1;
+}
+/*media-query*/
+@media only screen and (min-width: 922px) and (max-width: 1400px) {
+	.rowHps {
+		column-gap: 0;
+		flex-wrap: wrap;
+	}
+	.rowHps > div:nth-child(1) {
+		margin-bottom: 30px !important;
+	}
+	.rowHps > div:nth-child(1),
+	.rowHps > div:nth-child(3) {
+		margin-right: 15px !important;
+	}
+	.rowHps > div:nth-child(2),
+	.rowHps > div:nth-child(4) {
+		margin-left: 15px !important;
+	}
+	.rowHps {
+		padding-left: 30px !important;
+		padding-right: 30px !important;
+	}
+	.mainDivAinfo,
+	.mainDivAinfo2 {
+		flex: 35%;
+		margin: 0 !important;
+	}
+}
+@media only screen and (max-width: 922px) {
+	.rowHps {
+		flex-wrap: wrap;
+	}
+	.mainDivAinfo,
+	.mainDivAinfo2 {
+		flex: 100%;
+		margin: 0 !important;
+	}
+	.rowHps > div:nth-child(1),
+	.rowHps > div:nth-child(2),
+	.rowHps > div:nth-child(3) {
+		margin-bottom: 30px !important;
+		margin-top: 0 !important;
+	}
+	.rowHps > div:nth-child(4) {
+		margin: 0 !important;
+	}
+}
+@media only screen and (min-width: 922px) and (max-width: 1200px) {
+	.panels {
+		margin-top: 50px !important;
+	}
+	.list-rowbox {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+@media only screen and (max-width: 921px) {
+	.list-rowbox {
+		grid-template-columns: repeat(1, 1fr);
+	}
+	.list-col img:nth-child(2) {
+		width: 100% !important;
+	}
+	.radio-tabs .panels {
+		padding: 30px 20px;
+	}
+}
+
+@media only screen and (max-width: 767px) {
+	.abt-page-2ndsection .vc_empty_space {
+		height: 250px !important;
+	}
+	.abt-page-2ndsection-inner-1 .vc_col-sm-8 > div {
+		margin-top: 15px !important;
+	}
+
+	.abt-page-2ndsection-inner-2 .vc_col-sm-8 > div {
+		margin-top: 15px !important;
+	}
+
+	.abt-page-2ndsection-inner-2 {
+		padding: 20px 20px 20px;
+	}
+
+	.abt-page-2ndsection-inner-1 {
+		padding: 20px 20px 20px;
+	}
+
+	div.our-partner-inner-2 {
+		padding-top: 20px !important;
+	}
+
+	.our-partner-row h2 {
+		font-size: 30px !important;
+	}
+	.radio-tabs .tabs {
+		grid-template-columns: repeat(1, 1fr);
+		row-gap: 1px;
+		column-gap: 1px;
+		width: 100%;
+	}
+}
+
+.pum-theme-3657,
+.pum-theme-default-theme {
+	background-color: rgb(0 0 0 / 46%) !important;
+}
+
+.pum-theme-3658 .pum-container,
+.pum-theme-lightbox .pum-container {
+	padding: 20px;
+	border-radius: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	background-color: rgb(0 0 0 / 0%);
+}
+
+.wpb_images_carousel {
+	margin: auto;
+	width: 1000px;
+}
+
+.vc_images_carousel .vc_carousel-control .icon-next,
+.vc_images_carousel .vc_carousel-control .icon-prev {
+	margin-top: -15px;
+
+	font-size: 60px;
+	display: block;
+	padding: 0;
+	color: #fff;
+	z-index: 99;
+	opacity: 1;
+}
+.vc_images_carousel .vc_carousel-control .icon-prev {
+	margin-left: -150px;
+}
+
+.vc_images_carousel .vc_carousel-control .icon-next {
+	margin-right: -150px;
+}
+
+.vc_images_carousel .vc_carousel-control.vc_right {
+	left: auto;
+	right: -150px !important;
+}
+
+@media screen and (min-width: 768px) {
+	.vc_carousel-indicators {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 767px) {
+	.vc_carousel-control {
+		display: none;
+	}
+
+	.ast-builder-grid-row-container.ast-builder-grid-row-tablet-2-equal
+		.ast-builder-grid-row {
+		grid-template-columns: repeat(1, 1fr) !important;
+	}
+
+	.our-partenrs {
+		width: 300px;
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.property-2nd-row .list-rowbox {
+		width: 65%;
+		grid-template-columns: 1fr 1fr !important;
+		margin: auto;
+	}
+}
+
+@media screen and (min-width: 922px) {
+	.Aapara {
+		min-height: 320px;
+	}
+}
+
+.wpb_images_carousel {
+	margin: auto !important;
+	text-align: center;
+}
+
+.wpb_images_carousel img {
+	border-radius: 10px !important;
+}
+
+.pum-container {
+	margin-top: 80px;
+}
+
+.wpb_images_carousel {
+	margin: auto;
+	width: 750px;
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1260px) {
+	.Aapara {
+		min-height: 380px !important;
+	}
+}
+
+.our-partenrs {
+	display: grid;
+	grid-column-gap: 30px;
+	grid-template-columns: 63% auto;
+	padding-top: 20px;
+	align-items: center;
+}
+
+.our-partenrs img {
+	width: 100px;
+	height: auto;
+}
+
+.our-partenrs h3 {
+	font-size: 47px;
+}
